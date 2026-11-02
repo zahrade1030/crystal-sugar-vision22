@@ -74,17 +74,28 @@ class AppRepository(
                         parsed.vector.size ==
                         ProvisionalConstants.EXPECTED_FEATURE_VECTOR_SIZE
                     ) {
+
                         val normVec =
                             featureScaler.scale(parsed.vector, normMethod)
+
+                        val labValues = parsed.lab ?: Triple(
+                            ref.medianL,
+                            ref.medianA,
+                            ref.medianB
+                        )
 
                         StoredReferenceVector(
                             sampleId = ref.id,
                             sampleName = ref.name,
                             icumsaValue = ref.icumsaValue,
                             vector = normVec,
-                            lab = parsed.lab,
-                            source = "DATABASE"
+                            labMedian = LabMedian(
+                                medianL = labValues.first,
+                                medianA = labValues.second,
+                                medianB = labValues.third
+                            )
                         )
+
                     } else {
                         android.util.Log.w(
                             "AppRepository",
@@ -152,6 +163,19 @@ class AppRepository(
                 e.printStackTrace()
             }
 
+            val sampleLab = output.completeFeatureSet.labMedian
+
+            val deltaE00 = matchedRef?.let { ref ->
+                Ciede2000.compute(
+                    ref.medianL,
+                    ref.medianA,
+                    ref.medianB,
+                    sampleLab.medianL,
+                    sampleLab.medianA,
+                    sampleLab.medianB
+                ).deltaE00
+            } ?: 0.0
+
             val historyEntity = AnalysisHistoryEntity(
                 timestamp = now.time,
                 dateFormatted = dateFmt,
@@ -162,19 +186,21 @@ class AppRepository(
                 confidenceScorePct = classification.confidenceScorePct,
                 confidenceLevel = classification.confidenceLevel.name,
                 isUnknown = classification.isUnknown,
+
                 euclideanDistance =
                     classification.topMatch.euclideanDistance,
-                manhattanDistance =
-                    classification.topMatch.deltaE00,
+
+                manhattanDistance = deltaE00,
+
                 cosineSimilarity =
                     classification.topMatch.cosineSimilarity,
 
                 featureVectorJson = VectorFormat.serialize(
                     output.normalizedVector,
                     Triple(
-                        output.colorProfile.trimmedMeanL,
-                        output.colorProfile.trimmedMeanA,
-                        output.colorProfile.trimmedMeanB
+                        sampleLab.medianL,
+                        sampleLab.medianA,
+                        sampleLab.medianB
                     ),
                     schema = 3
                 ),
@@ -217,6 +243,12 @@ class AppRepository(
             (existing?.version ?: 1) + 1
 
         var savedPath = existing?.imagePath
+
+        var updatedLab = LabMedian(
+            existing?.medianL ?: 0.0,
+            existing?.medianA ?: 0.0,
+            existing?.medianB ?: 0.0
+        )
 
         val (newVectorJson, vectorSize) =
             if (newBitmap != null) {
@@ -262,10 +294,12 @@ class AppRepository(
 
                 val complete = output.completeFeatureSet
 
+                updatedLab = complete.labMedian
+
                 val lab = Triple(
-                    output.colorProfile.trimmedMeanL,
-                    output.colorProfile.trimmedMeanA,
-                    output.colorProfile.trimmedMeanB
+                    updatedLab.medianL,
+                    updatedLab.medianA,
+                    updatedLab.medianB
                 )
 
                 val json = VectorFormat.serialize(
@@ -298,9 +332,9 @@ class AppRepository(
             lastModifiedTimestamp = System.currentTimeMillis(),
             lastModifiedBy = operatorName,
             featureVectorSize = vectorSize,
-            medianL = existing?.medianL ?: 0.0,
-            medianA = existing?.medianA ?: 0.0,
-            medianB = existing?.medianB ?: 0.0
+            medianL = updatedLab.medianL,
+            medianA = updatedLab.medianA,
+            medianB = updatedLab.medianB
         )
 
         db.referenceSampleDao().insertOrUpdate(updatedEntity)
