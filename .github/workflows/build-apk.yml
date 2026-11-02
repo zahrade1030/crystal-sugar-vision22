@@ -17,13 +17,15 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Gradle
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: 9.3.1
+
+      - name: Check Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME"
 
       - name: Build Debug APK
         run: gradle assembleDebug
@@ -33,3 +35,4 @@ jobs:
         with:
           name: Crystal-Sugar-Vision-APK
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
