@@ -43,7 +43,7 @@ class AppRepository(
     suspend fun analyzeImage(
         bitmap: Bitmap,
         batchId: String? = null
-    ): Pair<ClassificationResult, OpenCvPipeline.PipelineOutput> =
+    ): Pair<ClassificationResult, PipelineOutput> =
         withContext(Dispatchers.Default) {
 
             val references =
