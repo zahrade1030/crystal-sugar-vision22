@@ -61,6 +61,8 @@ class ImageQualityValidator {
         var saturatedPixelCount = 0
         var darkPixelCount = 0
         var sumLuminanceValid = 0.0
+        var sumValidX = 0.0
+        var sumValidY = 0.0
 
         val validLuminances = ArrayList<Double>(totalPixels / 2)
 
@@ -82,6 +84,8 @@ class ImageQualityValidator {
                         // Valid sample pixel
                         validPixelCount++
                         sumLuminanceValid += lum
+                        sumValidX += x
+                        sumValidY += y
                         validLuminances.add(lum)
                     }
                 }
@@ -101,6 +105,18 @@ class ImageQualityValidator {
             varianceSum += diff * diff
         }
         val contrastStd = if (validPixelCount > 1) sqrt(varianceSum / validPixelCount) else 0.0
+        val centerAlignmentScore = if (validPixelCount > 0) {
+            val sampleCenterX = sumValidX / validPixelCount
+            val sampleCenterY = sumValidY / validPixelCount
+            
+            val distance = sqrt(
+                (sampleCenterX - centerX).pow(2) +
+                    (sampleCenterY - centerY).pow(2)
+            )
+            (1.0 - distance / radius).coerceIn(0.0, 1.0)
+        } else {
+            0.0
+        }
 
         // Validation Rules checking in Persian
         var rejectionReason: String? = null
@@ -139,8 +155,7 @@ class ImageQualityValidator {
             blurScore = blurScore,
             brightnessScore = meanBrightness,
             contrastScore = contrastStd,
-            sampleCoverage = sampleCoverage,
-            saturatedPixelRatio = saturatedRatio,
+            centerAlignmentScore = centerAlignmentScore,
             overallScore = overallScore,
             rejectionReason = rejectionReason
         )
