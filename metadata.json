@@ -1,0 +1,6 @@
+{
+  "name": "Crystal Sugar Vision",
+  "description": "Laboratory Sugar ICUMSA & Color Classification using Classical Computer Vision by Crystal Vision AI Group, Islamic Azad University Hamedan.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

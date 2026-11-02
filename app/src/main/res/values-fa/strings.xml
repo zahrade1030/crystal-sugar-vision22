@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">کریستال بین شکر</string>
+    <string name="nav_home">خانه</string>
+    <string name="nav_camera">دوربین</string>
+    <string name="nav_references">نمونه‌های مرجع</string>
+    <string name="nav_history">تاریخچه</string>
+    <string name="nav_calibration">کالیبراسیون</string>
+    <string name="nav_reports">گزارش‌ها</string>
+    <string name="nav_settings">تنظیمات</string>
+    <string name="nav_help">راهنما</string>
+    <string name="nav_about">درباره ما</string>
+    <string name="nav_dev_center">مرکز توسعه‌دهنده</string>
+    
+    <string name="title_dashboard">داشبورد آزمایشگاهی</string>
+    <string name="subtitle_dashboard">سامانه آنالیز رنگ و ایکومسا شکر</string>
+    
+    <!-- Dashboard Stats -->
+    <string name="stat_total_analyses">کل آنالیزها</string>
+    <string name="stat_last_analysis">آخرین آنالیز</string>
+    <string name="stat_last_sample">آخرین نمونه شناسایی شده</string>
+    <string name="stat_db_status">وضعیت دیتابیس</string>
+    <string name="stat_calibration_status">وضعیت کالیبراسیون</string>
+    <string name="stat_quality_status">وضعیت کیفیت تصویر</string>
+    
+    <!-- Actions -->
+    <string name="btn_capture">ثبت تصویر</string>
+    <string name="btn_gallery">انتخاب از گالری</string>
+    <string name="btn_analyze">آنالیز نمونه</string>
+    <string name="btn_advanced_analysis">مرکز آنالیز پیشرفته</string>
+    <string name="btn_export_pdf">خروجی PDF</string>
+    <string name="btn_export_excel">خروجی اکسل/CSV</string>
+    <string name="btn_export_json">خروجی JSON رمزنگاری شده</string>
+    <string name="btn_save">ذخیره نتیجه</string>
+    <string name="btn_recalibrate">کالیبراسیون مجدد دوربین</string>
+    
+    <!-- Image Quality & Validation -->
+    <string name="quality_passed">کیفیت تایید شد</string>
+    <string name="quality_rejected">کیفیت رد شد</string>
+    <string name="blur_score">میزان تاری</string>
+    <string name="brightness_score">روشنایی</string>
+    <string name="contrast_score">کنتراست</string>
+    <string name="center_alignment">تراز مرکز</string>
+    
+    <!-- Similarity Metrics -->
+    <string name="metric_euclidean">فاصله اقلیدسی</string>
+    <string name="metric_manhattan">فاصله منهتن</string>
+    <string name="metric_cosine">شباهت کسینوسی</string>
+    <string name="metric_weighted_vote">رأی‌گیری وزنی</string>
+    <string name="confidence_score">درصد اطمینان</string>
+    <string name="unknown_sample">نمونه ناشناخته (Unknown Sample)</string>
+    
+    <!-- Reference Samples Default Names -->
+    <string name="ref_1_name">شکر تصفیه شده فوق سفید (ICUMSA 45)</string>
+    <string name="ref_2_name">شکر سفید استاندارد (ICUMSA 100)</string>
+    <string name="ref_3_name">شکر سفید ممتاز (ICUMSA 150)</string>
+    <string name="ref_4_name">شکر قهوه‌ای روشن مزرعه (ICUMSA 300)</string>
+    <string name="ref_5_name">شکر خام تیره نیشکر (ICUMSA 600)</string>
+</resources>

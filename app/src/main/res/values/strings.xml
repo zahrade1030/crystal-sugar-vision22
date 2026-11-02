@@ -1,0 +1,58 @@
+<resources>
+    <string name="app_name">Crystal Sugar Vision</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_camera">Camera</string>
+    <string name="nav_references">References</string>
+    <string name="nav_history">History</string>
+    <string name="nav_calibration">Calibration</string>
+    <string name="nav_reports">Reports</string>
+    <string name="nav_settings">Settings</string>
+    <string name="nav_help">Help Center</string>
+    <string name="nav_about">About</string>
+    <string name="nav_dev_center">Developer Center</string>
+    
+    <string name="title_dashboard">Laboratory Dashboard</string>
+    <string name="subtitle_dashboard">Sugar ICUMSA &amp; Color Analysis System</string>
+    
+    <!-- Dashboard Stats -->
+    <string name="stat_total_analyses">Total Analyses</string>
+    <string name="stat_last_analysis">Last Analysis</string>
+    <string name="stat_last_sample">Last Sample</string>
+    <string name="stat_db_status">Database Status</string>
+    <string name="stat_calibration_status">Calibration Status</string>
+    <string name="stat_quality_status">Quality Status</string>
+    
+    <!-- Actions -->
+    <string name="btn_capture">Capture Image</string>
+    <string name="btn_gallery">Gallery Import</string>
+    <string name="btn_analyze">Analyze Sample</string>
+    <string name="btn_advanced_analysis">Advanced Analysis Center</string>
+    <string name="btn_export_pdf">Export PDF</string>
+    <string name="btn_export_excel">Export Excel/CSV</string>
+    <string name="btn_export_json">Export Encrypted JSON</string>
+    <string name="btn_save">Save Result</string>
+    <string name="btn_recalibrate">Recalibrate Camera</string>
+    
+    <!-- Image Quality & Validation -->
+    <string name="quality_passed">Quality Validated</string>
+    <string name="quality_rejected">Quality Rejected</string>
+    <string name="blur_score">Blur Score</string>
+    <string name="brightness_score">Brightness</string>
+    <string name="contrast_score">Contrast</string>
+    <string name="center_alignment">Center Alignment</string>
+    
+    <!-- Similarity Metrics -->
+    <string name="metric_euclidean">Euclidean Distance</string>
+    <string name="metric_manhattan">Manhattan Distance</string>
+    <string name="metric_cosine">Cosine Similarity</string>
+    <string name="metric_weighted_vote">Weighted Voting</string>
+    <string name="confidence_score">Confidence Score</string>
+    <string name="unknown_sample">Unknown Sample</string>
+    
+    <!-- Reference Samples Default Names -->
+    <string name="ref_1_name">Ultra White Refined Sugar (ICUMSA 45)</string>
+    <string name="ref_2_name">Standard White Sugar (ICUMSA 100)</string>
+    <string name="ref_3_name">Extra Special White Sugar (ICUMSA 150)</string>
+    <string name="ref_4_name">Light Plantation Brown Sugar (ICUMSA 300)</string>
+    <string name="ref_5_name">Raw Dark Cane Sugar (ICUMSA 600)</string>
+</resources>
