@@ -41,17 +41,19 @@ fun ReferenceDatabaseScreen(
     val references by viewModel.references.collectAsState()
     val isPersian = viewModel.language.collectAsState().value == "fa"
 
-    var selectedSampleForEdit by remember { mutableStateOf<ReferenceSampleEntity?>(null) }
-    var selectedSampleForZoom by remember { mutableStateOf<ReferenceSampleEntity?>(null) }
-
+    var selectedSampleForEdit by remember {
+        mutableStateOf<ReferenceSampleEntity?>(null)
+    }
+    var selectedSampleForZoom by remember {
+        mutableStateOf<ReferenceSampleEntity?>(null)
+    }
     var editName by remember { mutableStateOf("") }
     var editIcumsa by remember { mutableStateOf("") }
     var editDesc by remember { mutableStateOf("") }
     var editRawBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
-    // Dimension & Crop Controls
-    var targetResolution by remember { mutableStateOf(512) } // 256, 512, 1024
-    var selectedAspectRatio by remember { mutableStateOf("1:1") } // "1:1", "4:3", "Original"
+    var targetResolution by remember { mutableStateOf(512) }
+    var selectedAspectRatio by remember { mutableStateOf("1:1") }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -62,7 +64,12 @@ fun ReferenceDatabaseScreen(
                     val bmp = BitmapFactory.decodeStream(stream)
                     if (bmp != null) {
                         editRawBitmap = bmp
-                        Toast.makeText(context, if (isPersian) "تصویر مرجع بارگذاری شد" else "Reference image loaded", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            context,
+                            if (isPersian) "تصویر مرجع بارگذاری شد"
+                            else "Reference image loaded",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             } catch (e: Exception) {
@@ -71,9 +78,13 @@ fun ReferenceDatabaseScreen(
         }
     }
 
-    // Processed Bitmap based on resolution & crop ratio
-    val processedBitmap = remember(editRawBitmap, targetResolution, selectedAspectRatio) {
+    val processedBitmap = remember(
+        editRawBitmap,
+        targetResolution,
+        selectedAspectRatio
+    ) {
         val raw = editRawBitmap ?: return@remember null
+
         val cropped = when (selectedAspectRatio) {
             "1:1" -> {
                 val side = kotlin.math.min(raw.width, raw.height)
@@ -81,47 +92,76 @@ fun ReferenceDatabaseScreen(
                 val y = (raw.height - side) / 2
                 Bitmap.createBitmap(raw, x, y, side, side)
             }
+
             "4:3" -> {
                 val targetW = raw.width
                 val targetH = (targetW * 3) / 4
+
                 if (targetH <= raw.height) {
                     val y = (raw.height - targetH) / 2
                     Bitmap.createBitmap(raw, 0, y, targetW, targetH)
-                } else raw
+                } else {
+                    raw
+                }
             }
+
             else -> raw
         }
-        Bitmap.createScaledBitmap(cropped, targetResolution, targetResolution, true)
+
+        Bitmap.createScaledBitmap(
+            cropped,
+            targetResolution,
+            targetResolution,
+            true
+        )
     }
 
-    // Helper to load sample bitmap safely from file path or fallback
     fun loadSampleBitmap(sample: ReferenceSampleEntity): Bitmap? {
         val path = sample.imagePath ?: return null
         val directFile = File(path)
+
         if (directFile.exists()) {
-            val b = BitmapFactory.decodeFile(directFile.absolutePath)
-            if (b != null) return b
+            val bitmap = BitmapFactory.decodeFile(directFile.absolutePath)
+            if (bitmap != null) return bitmap
         }
-        val refDirFile = File(context.filesDir, "reference_samples/${directFile.name}")
+
+        val refDirFile = File(
+            context.filesDir,
+            "reference_samples/${directFile.name}"
+        )
+
         if (refDirFile.exists()) {
-            val b = BitmapFactory.decodeFile(refDirFile.absolutePath)
-            if (b != null) return b
+            val bitmap = BitmapFactory.decodeFile(refDirFile.absolutePath)
+            if (bitmap != null) return bitmap
         }
+
         return null
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (isPersian) "دیتابیس نمونه‌های مرجع (${references.size} نمونه)" else "Reference Database (${references.size} Samples)") },
+                title = {
+                    Text(
+                        if (isPersian) {
+                            "دیتابیس نمونه‌های مرجع (${references.size} نمونه)"
+                        } else {
+                            "Reference Database (${references.size} Samples)"
+                        }
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
         }
     ) { padding ->
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -129,31 +169,47 @@ fun ReferenceDatabaseScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             items(references) { sample ->
-                val sampleBitmap = remember(sample.imagePath, sample.version) {
+
+                val sampleBitmap = remember(
+                    sample.imagePath,
+                    sample.version
+                ) {
                     loadSampleBitmap(sample)
                 }
 
                 Card(
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            // Reference Sample Image Thumbnail with click to zoom
+
                             Box(
                                 modifier = Modifier
                                     .size(88.dp)
                                     .clip(RoundedCornerShape(12.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                                    .clickable { selectedSampleForZoom = sample },
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                    .clickable {
+                                        selectedSampleForZoom = sample
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
+
                                 if (sampleBitmap != null) {
                                     Image(
                                         bitmap = sampleBitmap.asImageBitmap(),
@@ -162,24 +218,39 @@ fun ReferenceDatabaseScreen(
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 } else {
-                                    Icon(Icons.Default.Science, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(32.dp))
+                                    Icon(
+                                        Icons.Default.Science,
+                                        contentDescription = null,
+                                        tint = Color.Gray,
+                                        modifier = Modifier.size(32.dp)
+                                    )
                                 }
                             }
 
-                            Column(modifier = Modifier.weight(1f)) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
+
                                     Text(
                                         text = "Sample ID #${sample.id}",
                                         fontSize = 11.sp,
                                         color = MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
-                                    Badge(containerColor = MaterialTheme.colorScheme.surfaceVariant) {
-                                        Text("v${sample.version}", modifier = Modifier.padding(2.dp))
+
+                                    Badge(
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                    ) {
+                                        Text(
+                                            "v${sample.version}",
+                                            modifier = Modifier.padding(2.dp)
+                                        )
                                     }
                                 }
 
@@ -200,22 +271,47 @@ fun ReferenceDatabaseScreen(
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
+
                         Text(
                             text = sample.description,
                             fontSize = 12.sp,
                             color = Color.Gray
                         )
 
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = Color.DarkGray.copy(alpha = 0.3f))
+                        HorizontalDivider(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            color = Color.DarkGray.copy(alpha = 0.3f)
+                        )
 
-                        // Complete Metadata display
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Text("Resolution: 512x512", fontSize = 10.sp, color = Color.Gray)
-                            Text("Vector Size: ${sample.featureVectorSize}", fontSize = 10.sp, color = Color.Gray)
-                            Text("Median LAB: L=${String.format("%.1f", sample.medianL)}, a=${String.format("%.1f", sample.medianA)}, b=${String.format("%.1f", sample.medianB)}", fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+
+                            Text(
+                                "Resolution: 512x512",
+                                fontSize = 10.sp,
+                                color = Color.Gray
+                            )
+
+                            Text(
+                                "Vector Size: ${sample.featureVectorSize}",
+                                fontSize = 10.sp,
+                                color = Color.Gray
+                            )
+
+                            Text(
+                                text = "Median LAB: L=${
+                                    String.format("%.1f", sample.medianL)
+                                }, a=${
+                                    String.format("%.1f", sample.medianA)
+                                }, b=${
+                                    String.format("%.1f", sample.medianB)
+                                }",
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(10.dp))
@@ -225,6 +321,7 @@ fun ReferenceDatabaseScreen(
                             horizontalArrangement = Arrangement.End,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+
                             OutlinedButton(
                                 onClick = {
                                     selectedSampleForEdit = sample
@@ -235,9 +332,23 @@ fun ReferenceDatabaseScreen(
                                 },
                                 shape = RoundedCornerShape(8.dp)
                             ) {
-                                Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(16.dp))
+
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(16.dp)
+                                )
+
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text(if (isPersian) "ویرایش و جایگزینی تصویر" else "Edit & Replace Image", fontSize = 12.sp)
+
+                                Text(
+                                    if (isPersian) {
+                                        "ویرایش و جایگزینی تصویر"
+                                    } else {
+                                        "Edit & Replace Image"
+                                    },
+                                    fontSize = 12.sp
+                                )
                             }
                         }
                     }
@@ -245,17 +356,24 @@ fun ReferenceDatabaseScreen(
             }
         }
 
-        // Full Image Preview Zoom Dialog
         selectedSampleForZoom?.let { sample ->
+
             val bmp = loadSampleBitmap(sample)
+
             AlertDialog(
-                onDismissRequest = { selectedSampleForZoom = null },
-                title = { Text(sample.name) },
+                onDismissRequest = {
+                    selectedSampleForZoom = null
+                },
+                title = {
+                    Text(sample.name)
+                },
                 text = {
+
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+
                         if (bmp != null) {
                             Image(
                                 bitmap = bmp.asImageBitmap(),
@@ -267,70 +385,148 @@ fun ReferenceDatabaseScreen(
                                 contentScale = ContentScale.Fit
                             )
                         }
+
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("ICUMSA: ${sample.icumsaValue}", fontWeight = FontWeight.Bold, color = Color(0xFF10B981))
-                        Text(sample.description, fontSize = 12.sp, color = Color.Gray)
+
+                        Text(
+                            "ICUMSA: ${sample.icumsaValue}",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF10B981)
+                        )
+
+                        Text(
+                            sample.description,
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { selectedSampleForZoom = null }) {
+                    TextButton(
+                        onClick = {
+                            selectedSampleForZoom = null
+                        }
+                    ) {
                         Text(if (isPersian) "بستن" else "Close")
                     }
                 }
             )
         }
 
-        // Edit Reference Sample Dialog
         selectedSampleForEdit?.let { sample ->
+
             AlertDialog(
-                onDismissRequest = { selectedSampleForEdit = null },
-                title = { Text(if (isPersian) "ویرایش نمونه مرجع #${sample.id}" else "Edit Reference #${sample.id}") },
+                onDismissRequest = {
+                    selectedSampleForEdit = null
+                },
+                title = {
+                    Text(
+                        if (isPersian) {
+                            "ویرایش نمونه مرجع #${sample.id}"
+                        } else {
+                            "Edit Reference #${sample.id}"
+                        }
+                    )
+                },
                 text = {
+
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
+
                         OutlinedTextField(
                             value = editName,
-                            onValueChange = { editName = it },
-                            label = { Text("Sample Name") },
+                            onValueChange = {
+                                editName = it
+                            },
+                            label = {
+                                Text("Sample Name")
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
+
                         OutlinedTextField(
                             value = editIcumsa,
-                            onValueChange = { editIcumsa = it },
-                            label = { Text("ICUMSA Value") },
+                            onValueChange = {
+                                editIcumsa = it
+                            },
+                            label = {
+                                Text("ICUMSA Value")
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
+
                         OutlinedTextField(
                             value = editDesc,
-                            onValueChange = { editDesc = it },
-                            label = { Text("Description") },
+                            onValueChange = {
+                                editDesc = it
+                            },
+                            label = {
+                                Text("Description")
+                            },
                             modifier = Modifier.fillMaxWidth()
                         )
 
                         Button(
-                            onClick = { imagePickerLauncher.launch("image/*") },
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                            onClick = {
+                                imagePickerLauncher.launch("image/*")
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            ),
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Icon(Icons.Default.PhotoCamera, contentDescription = null)
+
+                            Icon(
+                                Icons.Default.PhotoCamera,
+                                contentDescription = null
+                            )
+
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(if (editRawBitmap == null) (if (isPersian) "بارگذاری تصویر جدید از گالری" else "Select New Image") else (if (isPersian) "تغییر تصویر انتخاب شده" else "Change Selected Image"))
+
+                            Text(
+                                if (editRawBitmap == null) {
+                                    if (isPersian) {
+                                        "بارگذاری تصویر جدید از گالری"
+                                    } else {
+                                        "Select New Image"
+                                    }
+                                } else {
+                                    if (isPersian) {
+                                        "تغییر تصویر انتخاب شده"
+                                    } else {
+                                        "Change Selected Image"
+                                    }
+                                }
+                            )
                         }
 
-                        // Preview & Dimension Controls
                         processedBitmap?.let { previewBmp ->
+
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .background(
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    )
                                     .padding(8.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(if (isPersian) "پیش‌نمایش تصویر مرجع جدید (${targetResolution}x${targetResolution})" else "New Image Preview (${targetResolution}x${targetResolution})", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+
+                                Text(
+                                    if (isPersian) {
+                                        "پیش‌نمایش تصویر مرجع جدید (${targetResolution}x${targetResolution})"
+                                    } else {
+                                        "New Image Preview (${targetResolution}x${targetResolution})"
+                                    },
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+
                                 Spacer(modifier = Modifier.height(4.dp))
+
                                 Image(
                                     bitmap = previewBmp.asImageBitmap(),
                                     contentDescription = null,
@@ -341,67 +537,149 @@ fun ReferenceDatabaseScreen(
                                 )
 
                                 Spacer(modifier = Modifier.height(6.dp))
-                                Text(if (isPersian) "رزولوشن پردازش استاندارد:" else "Output Resolution:", fontSize = 10.sp, color = Color.Gray)
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+
+                                Text(
+                                    if (isPersian) {
+                                        "رزولوشن پردازش استاندارد:"
+                                    } else {
+                                        "Output Resolution:"
+                                    },
+                                    fontSize = 10.sp,
+                                    color = Color.Gray
+                                )
+
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+
                                     FilterChip(
                                         selected = targetResolution == 256,
-                                        onClick = { targetResolution = 256 },
-                                        label = { Text("256x256", fontSize = 10.sp) }
+                                        onClick = {
+                                            targetResolution = 256
+                                        },
+                                        label = {
+                                            Text("256x256", fontSize = 10.sp)
+                                        }
                                     )
+
                                     FilterChip(
                                         selected = targetResolution == 512,
-                                        onClick = { targetResolution = 512 },
-                                        label = { Text("512x512", fontSize = 10.sp) }
+                                        onClick = {
+                                            targetResolution = 512
+                                        },
+                                        label = {
+                                            Text("512x512", fontSize = 10.sp)
+                                        }
                                     )
+
                                     FilterChip(
                                         selected = targetResolution == 1024,
-                                        onClick = { targetResolution = 1024 },
-                                        label = { Text("1024x1024", fontSize = 10.sp) }
+                                        onClick = {
+                                            targetResolution = 1024
+                                        },
+                                        label = {
+                                            Text("1024x1024", fontSize = 10.sp)
+                                        }
                                     )
                                 }
 
-                                Text(if (isPersian) "نسبت ابعاد برش (Crop Aspect):" else "Crop Aspect Ratio:", fontSize = 10.sp, color = Color.Gray)
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                Text(
+                                    if (isPersian) {
+                                        "نسبت ابعاد برش (Crop Aspect):"
+                                    } else {
+                                        "Crop Aspect Ratio:"
+                                    },
+                                    fontSize = 10.sp,
+                                    color = Color.Gray
+                                )
+
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+
                                     FilterChip(
                                         selected = selectedAspectRatio == "1:1",
-                                        onClick = { selectedAspectRatio = "1:1" },
-                                        label = { Text("1:1 (مربعی)", fontSize = 10.sp) }
+                                        onClick = {
+                                            selectedAspectRatio = "1:1"
+                                        },
+                                        label = {
+                                            Text("1:1 (مربعی)", fontSize = 10.sp)
+                                        }
                                     )
+
                                     FilterChip(
                                         selected = selectedAspectRatio == "4:3",
-                                        onClick = { selectedAspectRatio = "4:3" },
-                                        label = { Text("4:3", fontSize = 10.sp) }
+                                        onClick = {
+                                            selectedAspectRatio = "4:3"
+                                        },
+                                        label = {
+                                            Text("4:3", fontSize = 10.sp)
+                                        }
                                     )
+
                                     FilterChip(
                                         selected = selectedAspectRatio == "Original",
-                                        onClick = { selectedAspectRatio = "Original" },
-                                        label = { Text("اصلی", fontSize = 10.sp) }
+                                        onClick = {
+                                            selectedAspectRatio = "Original"
+                                        },
+                                        label = {
+                                            Text("اصلی", fontSize = 10.sp)
+                                        }
                                     )
                                 }
                             }
                         }
                     }
                 },
+
                 confirmButton = {
+
                     Button(
                         onClick = {
-                            val icumsaInt = editIcumsa.toIntOrNull() ?: sample.icumsaValue
+
+                            // اصلاح اصلی: تبدیل مقدار ICUMSA به Double
+                            val icumsaValue = editIcumsa.toDoubleOrNull()
+                                ?: sample.icumsaValue.toDouble()
+
                             viewModel.updateReferenceSample(
                                 id = sample.id,
                                 name = editName,
-                                icumsa = icumsaInt,
+                                icumsa = icumsaValue,
                                 description = editDesc,
                                 newBitmap = processedBitmap
                             )
-                            Toast.makeText(context, if (isPersian) "نمونه مرجع ذخیره و ویژگی‌ها استخراج شد" else "Reference saved & features extracted", Toast.LENGTH_SHORT).show()
+
+                            Toast.makeText(
+                                context,
+                                if (isPersian) {
+                                    "نمونه مرجع ذخیره و ویژگی‌ها استخراج شد"
+                                } else {
+                                    "Reference saved & features extracted"
+                                },
+                                Toast.LENGTH_SHORT
+                            ).show()
+
                             selectedSampleForEdit = null
                         }
                     ) {
-                        Text(if (isPersian) "ذخیره و استخراج ویژگی" else "Save & Extract Features")
+
+                        Text(
+                            if (isPersian) {
+                                "ذخیره و استخراج ویژگی"
+                            } else {
+                                "Save & Extract Features"
+                            }
+                        )
                     }
                 },
+
                 dismissButton = {
-                    TextButton(onClick = { selectedSampleForEdit = null }) {
+
+                    TextButton(
+                        onClick = {
+                            selectedSampleForEdit = null
+                        }
+                    ) {
                         Text(if (isPersian) "انصراف" else "Cancel")
                     }
                 }
