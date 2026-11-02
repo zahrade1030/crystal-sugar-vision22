@@ -62,7 +62,7 @@ fun HomeScreen(
     onNavigateToHelp: () -> Unit,
     onNavigateToDevCenter: () -> Unit,
     onNavigateToAbout: () -> Unit = {},
-    onNavigateToComare: () -> Unit = {}
+    onNavigateToCompare: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
